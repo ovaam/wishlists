@@ -6,13 +6,28 @@ let wishlists = {
 };
 
 // Текущий выбранный пользователь
-let currentUser = 'я';
+let currentUser = null;
 
 // Загрузка данных из localStorage
 function loadWishlists() {
     const saved = localStorage.getItem('wishlists');
     if (saved) {
-        wishlists = JSON.parse(saved);
+        try {
+            const parsed = JSON.parse(saved);
+            // Миграция старых данных (если были строки, преобразуем в объекты)
+            Object.keys(parsed).forEach(user => {
+                if (Array.isArray(parsed[user])) {
+                    wishlists[user] = parsed[user].map(item => {
+                        if (typeof item === 'string') {
+                            return { name: item, comment: '' };
+                        }
+                        return item;
+                    });
+                }
+            });
+        } catch (e) {
+            console.error('Ошибка загрузки данных:', e);
+        }
     }
 }
 
@@ -25,42 +40,45 @@ function saveWishlists() {
 document.addEventListener('DOMContentLoaded', () => {
     loadWishlists();
     setupEventListeners();
-    renderWishlist();
+    showHomeScreen();
 });
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Кнопки выбора пользователя
-    document.querySelectorAll('.user-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const user = btn.dataset.user;
-            switchUser(user);
+    // Клики по аватарам
+    document.querySelectorAll('.avatar-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const user = card.dataset.user;
+            openWishlist(user);
         });
     });
+
+    // Кнопка "Назад"
+    document.getElementById('backBtn').addEventListener('click', showHomeScreen);
 
     // Кнопка добавления
     document.getElementById('addBtn').addEventListener('click', addItem);
 
-    // Enter в поле ввода
-    document.getElementById('itemInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    // Enter в поле названия
+    document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
             addItem();
         }
     });
 }
 
-// Переключение пользователя
-function switchUser(user) {
+// Показать главный экран
+function showHomeScreen() {
+    document.getElementById('homeScreen').classList.add('active');
+    document.getElementById('wishlistScreen').classList.remove('active');
+    currentUser = null;
+}
+
+// Открыть вишлист пользователя
+function openWishlist(user) {
     currentUser = user;
     
-    // Обновление активной кнопки
-    document.querySelectorAll('.user-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.user === user) {
-            btn.classList.add('active');
-        }
-    });
-
     // Обновление заголовка
     const titles = {
         'я': 'Мой вишлист',
@@ -69,8 +87,13 @@ function switchUser(user) {
     };
     document.getElementById('currentUserTitle').textContent = titles[user];
 
-    // Очистка поля ввода
-    document.getElementById('itemInput').value = '';
+    // Очистка полей ввода
+    document.getElementById('itemNameInput').value = '';
+    document.getElementById('itemCommentInput').value = '';
+
+    // Переключение экранов
+    document.getElementById('homeScreen').classList.remove('active');
+    document.getElementById('wishlistScreen').classList.add('active');
 
     // Отображение вишлиста
     renderWishlist();
@@ -78,19 +101,28 @@ function switchUser(user) {
 
 // Добавление элемента в вишлист
 function addItem() {
-    const input = document.getElementById('itemInput');
-    const itemText = input.value.trim();
+    const nameInput = document.getElementById('itemNameInput');
+    const commentInput = document.getElementById('itemCommentInput');
+    
+    const name = nameInput.value.trim();
+    const comment = commentInput.value.trim();
 
-    if (itemText === '') {
+    if (name === '') {
+        nameInput.focus();
         return;
     }
 
     // Добавляем элемент в вишлист текущего пользователя
-    wishlists[currentUser].push(itemText);
+    wishlists[currentUser].push({
+        name: name,
+        comment: comment
+    });
     saveWishlists();
 
-    // Очищаем поле ввода
-    input.value = '';
+    // Очищаем поля ввода
+    nameInput.value = '';
+    commentInput.value = '';
+    nameInput.focus();
 
     // Обновляем отображение
     renderWishlist();
@@ -115,7 +147,10 @@ function renderWishlist() {
 
     wishlistElement.innerHTML = items.map((item, index) => `
         <li class="wishlist-item">
-            <span class="wishlist-item-text">${escapeHtml(item)}</span>
+            <div class="wishlist-item-content">
+                <h3 class="wishlist-item-name">${escapeHtml(item.name || item)}</h3>
+                ${item.comment ? `<p class="wishlist-item-comment">${escapeHtml(item.comment)}</p>` : ''}
+            </div>
             <button class="delete-btn" onclick="deleteItem(${index})">Удалить</button>
         </li>
     `).join('');

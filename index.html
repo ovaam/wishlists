@@ -3,40 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Наши Вишлисты</title>
+    <title>Наши Желания</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎄 Наши Вишлисты</h1>
-            <div class="user-selector">
-                <button class="user-btn active" data-user="я">Я</button>
-                <button class="user-btn" data-user="мама">Мама</button>
-                <button class="user-btn" data-user="сестра">Сестра</button>
-            </div>
-        </header>
-
-        <main>
-            <div class="wishlist-section">
-                <div class="add-item-form">
-                    <input 
-                        type="text" 
-                        id="itemInput" 
-                        placeholder="Добавить желание..." 
-                        class="item-input"
-                    >
-                    <button id="addBtn" class="add-btn">Добавить</button>
+    <!-- Главный экран с аватарами -->
+    <div id="homeScreen" class="screen active">
+        <div class="container">
+            <header>
+                <h1>🎄 НАШИ ЖЕЛАНИЯ</h1>
+            </header>
+            <main>
+                <div class="avatars-container">
+                    <div class="avatar-card" data-user="я">
+                        <div class="avatar-circle">👤</div>
+                        <h2>Я</h2>
+                    </div>
+                    <div class="avatar-card" data-user="мама">
+                        <div class="avatar-circle">👩</div>
+                        <h2>Мама</h2>
+                    </div>
+                    <div class="avatar-card" data-user="сестра">
+                        <div class="avatar-circle">👧</div>
+                        <h2>Сестра</h2>
+                    </div>
                 </div>
+            </main>
+        </div>
+    </div>
 
-                <div class="wishlist-container">
-                    <h2 id="currentUserTitle">Мой вишлист</h2>
-                    <ul id="wishlist" class="wishlist">
-                        <!-- Элементы вишлиста будут добавлены через JavaScript -->
-                    </ul>
+    <!-- Экран вишлиста -->
+    <div id="wishlistScreen" class="screen">
+        <div class="container">
+            <header>
+                <button id="backBtn" class="back-btn">← Назад</button>
+                <h1 id="currentUserTitle">Мой вишлист</h1>
+            </header>
+            <main>
+                <div class="wishlist-section">
+                    <div class="add-item-form">
+                        <input 
+                            type="text" 
+                            id="itemNameInput" 
+                            placeholder="Название желания..." 
+                            class="item-input"
+                        >
+                        <textarea 
+                            id="itemCommentInput" 
+                            placeholder="Комментарий..." 
+                            class="item-comment-input"
+                            rows="2"
+                        ></textarea>
+                        <button id="addBtn" class="add-btn">Добавить</button>
+                    </div>
+
+                    <div class="wishlist-container">
+                        <ul id="wishlist" class="wishlist">
+                            <!-- Элементы вишлиста будут добавлены через JavaScript -->
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
 
     <script src="script.js"></script>

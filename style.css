@@ -12,13 +12,24 @@ body {
     color: #333;
 }
 
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
+    min-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -26,26 +37,23 @@ header {
     color: white;
     padding: 30px;
     text-align: center;
+    position: relative;
 }
 
 header h1 {
     font-size: 2.5em;
-    margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.user-selector {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.user-btn {
-    padding: 12px 24px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+.back-btn {
+    position: absolute;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.2);
     color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
     font-size: 1em;
@@ -54,38 +62,97 @@ header h1 {
     backdrop-filter: blur(10px);
 }
 
-.user-btn:hover {
+.back-btn:hover {
     background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+    transform: translateY(-50%) translateX(-3px);
 }
 
-.user-btn.active {
-    background: white;
+/* Главный экран с аватарами */
+.avatars-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 60px 30px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.avatar-card {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.avatar-card:hover {
+    transform: translateY(-10px);
+}
+
+.avatar-card:hover .avatar-circle {
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.avatar-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4em;
+    margin: 0 auto 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.avatar-card h2 {
+    font-size: 1.5em;
     color: #667eea;
-    border-color: white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
 }
 
 main {
     padding: 30px;
+    flex: 1;
 }
 
 .add-item-form {
     display: flex;
+    flex-direction: column;
     gap: 10px;
     margin-bottom: 30px;
 }
 
 .item-input {
-    flex: 1;
     padding: 15px 20px;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
     font-size: 1em;
     transition: all 0.3s ease;
+    font-family: inherit;
 }
 
 .item-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.item-comment-input {
+    padding: 15px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.item-comment-input:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -101,7 +168,6 @@ main {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    white-space: nowrap;
 }
 
 .add-btn:hover {
@@ -113,10 +179,8 @@ main {
     transform: translateY(0);
 }
 
-.wishlist-container h2 {
-    margin-bottom: 20px;
-    color: #667eea;
-    font-size: 1.8em;
+.wishlist-container {
+    margin-top: 20px;
 }
 
 .wishlist {
@@ -125,12 +189,12 @@ main {
 
 .wishlist-item {
     background: #f8f9fa;
-    padding: 15px 20px;
-    margin-bottom: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
     border-radius: 12px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     transition: all 0.3s ease;
     border-left: 4px solid #667eea;
 }
@@ -141,10 +205,23 @@ main {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.wishlist-item-text {
+.wishlist-item-content {
     flex: 1;
-    font-size: 1.1em;
+    margin-right: 15px;
+}
+
+.wishlist-item-name {
+    font-size: 1.3em;
     color: #333;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.wishlist-item-comment {
+    font-size: 1em;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
 }
 
 .delete-btn {
@@ -156,6 +233,8 @@ main {
     cursor: pointer;
     font-size: 0.9em;
     transition: all 0.3s ease;
+    white-space: nowrap;
+    align-self: flex-start;
 }
 
 .delete-btn:hover {
@@ -165,7 +244,7 @@ main {
 
 .empty-state {
     text-align: center;
-    padding: 40px;
+    padding: 60px 40px;
     color: #999;
     font-size: 1.2em;
 }
@@ -173,13 +252,35 @@ main {
 .empty-state::before {
     content: "🎁";
     display: block;
-    font-size: 3em;
-    margin-bottom: 10px;
+    font-size: 4em;
+    margin-bottom: 20px;
 }
 
 @media (max-width: 600px) {
     header h1 {
-        font-size: 2em;
+        font-size: 1.8em;
+    }
+    
+    .back-btn {
+        position: static;
+        transform: none;
+        margin-bottom: 15px;
+        display: inline-block;
+    }
+    
+    header {
+        padding: 20px;
+    }
+    
+    .avatars-container {
+        padding: 40px 20px;
+        gap: 30px;
+    }
+    
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        font-size: 3em;
     }
     
     .add-item-form {
@@ -188,6 +289,15 @@ main {
     
     .add-btn {
         width: 100%;
+    }
+    
+    .wishlist-item {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .delete-btn {
+        align-self: flex-end;
     }
 }
 
