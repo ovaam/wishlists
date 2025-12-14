@@ -25,9 +25,43 @@
             
             <!-- Имена -->
             <div class="names-container">
+                <button class="name-btn" data-user="алина">Алина</button>
                 <button class="name-btn" data-user="леся">Леся</button>
                 <button class="name-btn" data-user="мама">Мама</button>
-                <button class="name-btn" data-user="алина">Алина</button>
+            </div>
+            
+            <!-- Описание -->
+            <div class="description-container">
+                <p class="description-text">
+                    Это не привычный вишлист, а новое видение ваших желаний! Пожалуйста, просто укажите какой подарок вы хотите, но дайте возможность креатива дарителю. Скажите, к примеру, что хотите футболку с принтом, а не указывайте конкретную - пусть даритель придумает сам и подумает о ваших вкусах! Счастливого нового года)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно авторизации -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h2>Авторизация</h2>
+            <p class="modal-subtitle">Введите ваше имя и пароль для добавления желаний</p>
+            <div class="auth-form">
+                <select id="authNameInput" class="auth-input">
+                    <option value="">Выберите имя</option>
+                    <option value="леся">Леся</option>
+                    <option value="мама">Мама</option>
+                    <option value="алина">Алина</option>
+                </select>
+                <input 
+                    type="password" 
+                    id="authPasswordInput" 
+                    placeholder="Пароль" 
+                    class="auth-input"
+                >
+                <div class="auth-buttons">
+                    <button id="authSubmitBtn" class="auth-btn">Войти</button>
+                    <button id="authCancelBtn" class="auth-btn auth-btn-cancel">Отмена</button>
+                </div>
+                <p id="authError" class="auth-error"></p>
             </div>
         </div>
     </div>
@@ -38,6 +72,7 @@
             <header>
                 <button id="backBtn" class="back-btn">← Назад</button>
                 <h1 id="currentUserTitle">Мой вишлист</h1>
+                <div id="authStatus" class="auth-status"></div>
             </header>
             <main>
                 <div class="wishlist-section">

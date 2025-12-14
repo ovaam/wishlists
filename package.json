@@ -1,0 +1,16 @@
+{
+  "name": "wishlist-app",
+  "version": "1.0.0",
+  "description": "Семейный вишлист с авторизацией и бронированием",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "python3 -m http.server 8000",
+    "check": "echo 'Проверка файлов...' && ls -la index.html style.css script.js letters.jpg people.jpg",
+    "deploy:netlify": "echo 'Для Netlify: просто перетащите папку на https://app.netlify.com/drop'",
+    "deploy:github": "git add . && git commit -m 'Deploy' && git push"
+  },
+  "keywords": ["wishlist", "family"],
+  "author": "",
+  "license": "MIT"
+}
+

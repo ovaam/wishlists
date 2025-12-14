@@ -95,7 +95,7 @@ body {
 
 .name-btn {
     padding: 20px 40px;
-    background: rgba(220, 20, 60, 0.9);
+    background: #8B1538;
     color: white;
     border: none;
     border-radius: 15px;
@@ -103,18 +103,35 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+    box-shadow: 0 4px 15px rgba(139, 21, 56, 0.4);
     min-width: 120px;
 }
 
 .name-btn:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.5);
-    background: rgba(220, 20, 60, 1);
+    box-shadow: 0 6px 20px rgba(139, 21, 56, 0.6);
+    background: #7B1A3A;
 }
 
 .name-btn:active {
     transform: translateY(-2px);
+}
+
+/* Описание */
+.description-container {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 50px;
+    padding: 0 20px 40px;
+}
+
+.description-text {
+    text-align: center;
+    color: #666;
+    font-size: 1em;
+    line-height: 1.6;
+    margin: 0;
+    font-style: italic;
 }
 
 /* Контейнер для экрана вишлиста */
@@ -281,6 +298,13 @@ main {
     margin-right: 15px;
 }
 
+.wishlist-item-actions {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
 .wishlist-item-name {
     font-size: 1.3em;
     color: #333;
@@ -311,6 +335,189 @@ main {
 .delete-btn:hover {
     background: #ff5252;
     transform: scale(1.05);
+}
+
+.book-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    align-self: flex-start;
+}
+
+.book-btn:hover {
+    background: #45a049;
+    transform: scale(1.05);
+}
+
+.book-btn.booked {
+    background: #ff9800;
+}
+
+.book-btn.booked:hover {
+    background: #f57c00;
+}
+
+.wishlist-item.booked {
+    border-left-color: #ff9800;
+    background: rgba(255, 248, 220, 0.9);
+}
+
+.booking-status {
+    font-size: 0.9em;
+    color: #ff9800;
+    font-weight: 600;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Модальное окно авторизации */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.8em;
+}
+
+.modal-subtitle {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-input {
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: #8B1538;
+    box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.auth-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: #8B1538;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+    background: #7B1A3A;
+    transform: translateY(-2px);
+}
+
+.auth-btn-cancel {
+    background: #999;
+}
+
+.auth-btn-cancel:hover {
+    background: #777;
+}
+
+.auth-error {
+    color: #ff5252;
+    font-size: 0.9em;
+    margin-top: -5px;
+    min-height: 20px;
+}
+
+/* Статус авторизации */
+.auth-status {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.auth-user {
+    color: white;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.logout-btn {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .empty-state {

@@ -5,8 +5,16 @@ let wishlists = {
     'алина': []
 };
 
-// Текущий выбранный пользователь
+// Текущий выбранный пользователь (чей вишлист открыт)
 let currentUser = null;
+
+// Авторизованный пользователь
+let authorizedUser = null;
+const PASSWORDS = {
+    'леся': 'lesik',
+    'мама': 'lesikcool',
+    'алина': 'lesikbest'
+};
 
 // Загрузка данных из localStorage
 function loadWishlists() {
@@ -24,8 +32,11 @@ function loadWishlists() {
                 if (Array.isArray(parsed[user])) {
                     wishlists[newKey] = parsed[user].map(item => {
                         if (typeof item === 'string') {
-                            return { name: item, comment: '' };
+                            return { name: item, comment: '', owner: newKey, bookedBy: null };
                         }
+                        // Добавляем недостающие поля к существующим элементам
+                        if (!item.owner) item.owner = newKey;
+                        if (item.bookedBy === undefined) item.bookedBy = null;
                         return item;
                     });
                 }
@@ -43,9 +54,29 @@ function saveWishlists() {
     localStorage.setItem('wishlists', JSON.stringify(wishlists));
 }
 
+// Загрузка авторизации
+function loadAuth() {
+    const saved = localStorage.getItem('authorizedUser');
+    if (saved) {
+        authorizedUser = saved;
+        updateAuthStatus();
+    }
+}
+
+// Сохранение авторизации
+function saveAuth() {
+    if (authorizedUser) {
+        localStorage.setItem('authorizedUser', authorizedUser);
+    } else {
+        localStorage.removeItem('authorizedUser');
+    }
+    updateAuthStatus();
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     loadWishlists();
+    loadAuth();
     setupEventListeners();
     showHomeScreen();
     createSnowflakes();
@@ -65,13 +96,32 @@ function setupEventListeners() {
     document.getElementById('backBtn').addEventListener('click', showHomeScreen);
 
     // Кнопка добавления
-    document.getElementById('addBtn').addEventListener('click', addItem);
+    document.getElementById('addBtn').addEventListener('click', () => {
+        if (!authorizedUser) {
+            showAuthModal();
+        } else {
+            addItem();
+        }
+    });
 
     // Enter в поле названия
     document.getElementById('itemNameInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            addItem();
+            if (!authorizedUser) {
+                showAuthModal();
+            } else {
+                addItem();
+            }
+        }
+    });
+
+    // Авторизация
+    document.getElementById('authSubmitBtn').addEventListener('click', handleAuth);
+    document.getElementById('authCancelBtn').addEventListener('click', hideAuthModal);
+    document.getElementById('authPasswordInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleAuth();
         }
     });
 }
@@ -107,8 +157,77 @@ function openWishlist(user) {
     renderWishlist();
 }
 
+// Показать модальное окно авторизации
+function showAuthModal() {
+    document.getElementById('authModal').classList.add('active');
+    document.getElementById('authNameInput').focus();
+    document.getElementById('authError').textContent = '';
+}
+
+// Скрыть модальное окно авторизации
+function hideAuthModal() {
+    document.getElementById('authModal').classList.remove('active');
+    document.getElementById('authNameInput').value = '';
+    document.getElementById('authPasswordInput').value = '';
+    document.getElementById('authError').textContent = '';
+}
+
+// Обработка авторизации
+function handleAuth() {
+    const name = document.getElementById('authNameInput').value;
+    const password = document.getElementById('authPasswordInput').value;
+
+    if (!name) {
+        document.getElementById('authError').textContent = 'Выберите имя';
+        return;
+    }
+
+    const correctPassword = PASSWORDS[name];
+    if (!correctPassword || password !== correctPassword) {
+        document.getElementById('authError').textContent = 'Неверный пароль';
+        return;
+    }
+
+    authorizedUser = name;
+    saveAuth();
+    hideAuthModal();
+    
+    // Если была попытка добавить желание, добавляем его
+    const nameInput = document.getElementById('itemNameInput');
+    if (nameInput.value.trim()) {
+        addItem();
+    }
+}
+
+// Обновить статус авторизации
+function updateAuthStatus() {
+    const authStatus = document.getElementById('authStatus');
+    if (authorizedUser) {
+        const names = {
+            'леся': 'Леся',
+            'мама': 'Мама',
+            'алина': 'Алина'
+        };
+        authStatus.innerHTML = `
+            <span class="auth-user">Вы вошли как: ${names[authorizedUser]}</span>
+            <button id="logoutBtn" class="logout-btn">Выйти</button>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            authorizedUser = null;
+            saveAuth();
+        });
+    } else {
+        authStatus.innerHTML = '';
+    }
+}
+
 // Добавление элемента в вишлист
 function addItem() {
+    if (!authorizedUser) {
+        showAuthModal();
+        return;
+    }
+
     const nameInput = document.getElementById('itemNameInput');
     const commentInput = document.getElementById('itemCommentInput');
     
@@ -123,7 +242,9 @@ function addItem() {
     // Добавляем элемент в вишлист текущего пользователя
     wishlists[currentUser].push({
         name: name,
-        comment: comment
+        comment: comment,
+        owner: currentUser,
+        bookedBy: null
     });
     saveWishlists();
 
@@ -138,7 +259,39 @@ function addItem() {
 
 // Удаление элемента из вишлиста
 function deleteItem(index) {
-    wishlists[currentUser].splice(index, 1);
+    if (!authorizedUser) {
+        showAuthModal();
+        return;
+    }
+
+    const item = wishlists[currentUser][index];
+    // Можно удалять только свои желания
+    if (item.owner === authorizedUser) {
+        wishlists[currentUser].splice(index, 1);
+        saveWishlists();
+        renderWishlist();
+    } else {
+        alert('Вы можете удалять только свои желания');
+    }
+}
+
+// Бронирование желания
+function bookItem(user, index) {
+    if (!authorizedUser) {
+        showAuthModal();
+        return;
+    }
+
+    const item = wishlists[user][index];
+    
+    if (item.bookedBy === authorizedUser) {
+        // Отменить бронирование
+        item.bookedBy = null;
+    } else if (!item.bookedBy) {
+        // Забронировать
+        item.bookedBy = authorizedUser;
+    }
+    
     saveWishlists();
     renderWishlist();
 }
@@ -153,15 +306,38 @@ function renderWishlist() {
         return;
     }
 
-    wishlistElement.innerHTML = items.map((item, index) => `
-        <li class="wishlist-item">
+    wishlistElement.innerHTML = items.map((item, index) => {
+        const isOwner = item.owner === authorizedUser;
+        const isBooked = item.bookedBy !== null;
+        const isBookedByMe = item.bookedBy === authorizedUser;
+        const showBooking = authorizedUser && item.owner !== authorizedUser;
+        // Статус бронирования виден только авторизованным пользователям, кроме владельца желания
+        const showBookingStatus = authorizedUser && isBooked && item.owner !== authorizedUser;
+        
+        const names = {
+            'леся': 'Леся',
+            'мама': 'Мама',
+            'алина': 'Алина'
+        };
+
+        return `
+        <li class="wishlist-item ${showBookingStatus && isBooked ? 'booked' : ''}">
             <div class="wishlist-item-content">
                 <h3 class="wishlist-item-name">${escapeHtml(item.name || item)}</h3>
                 ${item.comment ? `<p class="wishlist-item-comment">${escapeHtml(item.comment)}</p>` : ''}
+                ${showBookingStatus ? `<p class="booking-status">Забронировано: ${names[item.bookedBy]}</p>` : ''}
             </div>
-            <button class="delete-btn" onclick="deleteItem(${index})">Удалить</button>
+            <div class="wishlist-item-actions">
+                ${showBooking ? `
+                    <button class="book-btn ${isBookedByMe ? 'booked' : ''}" onclick="bookItem('${currentUser}', ${index})">
+                        ${isBookedByMe ? 'Отменить бронирование' : 'Забронировать'}
+                    </button>
+                ` : ''}
+                ${isOwner ? `<button class="delete-btn" onclick="deleteItem(${index})">Удалить</button>` : ''}
+            </div>
         </li>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Экранирование HTML для безопасности
