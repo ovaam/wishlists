@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Наши Вишлисты</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎄 Наши Вишлисты</h1>
+            <div class="user-selector">
+                <button class="user-btn active" data-user="я">Я</button>
+                <button class="user-btn" data-user="мама">Мама</button>
+                <button class="user-btn" data-user="сестра">Сестра</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="wishlist-section">
+                <div class="add-item-form">
+                    <input 
+                        type="text" 
+                        id="itemInput" 
+                        placeholder="Добавить желание..." 
+                        class="item-input"
+                    >
+                    <button id="addBtn" class="add-btn">Добавить</button>
+                </div>
+
+                <div class="wishlist-container">
+                    <h2 id="currentUserTitle">Мой вишлист</h2>
+                    <ul id="wishlist" class="wishlist">
+                        <!-- Элементы вишлиста будут добавлены через JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
