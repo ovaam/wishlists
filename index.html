@@ -7,28 +7,28 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Главный экран с аватарами -->
+    <!-- Анимация снега -->
+    <div class="snow-container"></div>
+    
+    <!-- Главный экран -->
     <div id="homeScreen" class="screen active">
-        <div class="container">
-            <header>
-                <h1>🎄 НАШИ ЖЕЛАНИЯ</h1>
-            </header>
-            <main>
-                <div class="avatars-container">
-                    <div class="avatar-card" data-user="я">
-                        <div class="avatar-circle">👤</div>
-                        <h2>Я</h2>
-                    </div>
-                    <div class="avatar-card" data-user="мама">
-                        <div class="avatar-circle">👩</div>
-                        <h2>Мама</h2>
-                    </div>
-                    <div class="avatar-card" data-user="сестра">
-                        <div class="avatar-circle">👧</div>
-                        <h2>Сестра</h2>
-                    </div>
-                </div>
-            </main>
+        <div class="home-container">
+            <!-- Логотип -->
+            <div class="logo-container">
+                <img src="letters.jpg" alt="Наши Желания" class="logo-image">
+            </div>
+            
+            <!-- Фотографии -->
+            <div class="photos-container">
+                <img src="people.jpg" alt="Мы" class="photos-image">
+            </div>
+            
+            <!-- Имена -->
+            <div class="names-container">
+                <button class="name-btn" data-user="леся">Леся</button>
+                <button class="name-btn" data-user="мама">Мама</button>
+                <button class="name-btn" data-user="алина">Алина</button>
+            </div>
         </div>
     </div>
 

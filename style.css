@@ -6,10 +6,29 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #ffffff;
     min-height: 100vh;
-    padding: 20px;
+    padding: 0;
     color: #333;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Анимация падающего снега */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.snowflake {
+    user-select: none;
+    text-shadow: 0 0 5px rgba(136, 136, 136, 0.8);
 }
 
 .screen {
@@ -20,24 +39,107 @@ body {
     display: block;
 }
 
+/* Главный экран */
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Логотип */
+.logo-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.logo-image {
+    width: 70%;
+    max-width: 800px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Фотографии */
+.photos-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.photos-image {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Имена */
+.names-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.name-btn {
+    padding: 20px 40px;
+    background: rgba(220, 20, 60, 0.9);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.5em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+    min-width: 120px;
+}
+
+.name-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.5);
+    background: rgba(220, 20, 60, 1);
+}
+
+.name-btn:active {
+    transform: translateY(-2px);
+}
+
+/* Контейнер для экрана вишлиста */
 .container {
     max-width: 900px;
     margin: 0 auto;
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     min-height: calc(100vh - 40px);
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
 }
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #dc143c 0%, #8b0000 50%, #c41e3a 100%);
     color: white;
     padding: 30px;
     text-align: center;
     position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 header h1 {
@@ -67,53 +169,6 @@ header h1 {
     transform: translateY(-50%) translateX(-3px);
 }
 
-/* Главный экран с аватарами */
-.avatars-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    padding: 60px 30px;
-    flex-wrap: wrap;
-    flex: 1;
-}
-
-.avatar-card {
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 20px;
-    border-radius: 20px;
-}
-
-.avatar-card:hover {
-    transform: translateY(-10px);
-}
-
-.avatar-card:hover .avatar-circle {
-    transform: scale(1.1);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-}
-
-.avatar-circle {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4em;
-    margin: 0 auto 20px;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-}
-
-.avatar-card h2 {
-    font-size: 1.5em;
-    color: #667eea;
-    font-weight: 600;
-}
 
 main {
     padding: 30px;
@@ -129,38 +184,52 @@ main {
 
 .item-input {
     padding: 15px 20px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #dc143c;
     border-radius: 12px;
     font-size: 1em;
     transition: all 0.3s ease;
     font-family: inherit;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
+.item-input::placeholder {
+    color: #999;
 }
 
 .item-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #dc143c;
+    box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.2);
+    background: #fff;
 }
 
 .item-comment-input {
     padding: 15px 20px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #dc143c;
     border-radius: 12px;
     font-size: 1em;
     transition: all 0.3s ease;
     font-family: inherit;
     resize: vertical;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
+.item-comment-input::placeholder {
+    color: #999;
 }
 
 .item-comment-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #dc143c;
+    box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.2);
+    background: #fff;
 }
 
 .add-btn {
     padding: 15px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #dc143c 0%, #8b0000 50%, #c41e3a 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -168,11 +237,12 @@ main {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(139, 0, 0, 0.3);
 }
 
 .add-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(220, 20, 60, 0.5);
 }
 
 .add-btn:active {
@@ -188,7 +258,7 @@ main {
 }
 
 .wishlist-item {
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.9);
     padding: 20px;
     margin-bottom: 15px;
     border-radius: 12px;
@@ -196,13 +266,14 @@ main {
     justify-content: space-between;
     align-items: flex-start;
     transition: all 0.3s ease;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #dc143c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .wishlist-item:hover {
-    background: #e9ecef;
+    background: rgba(255, 255, 255, 1);
     transform: translateX(5px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .wishlist-item-content {
@@ -245,7 +316,7 @@ main {
 .empty-state {
     text-align: center;
     padding: 60px 40px;
-    color: #999;
+    color: #666;
     font-size: 1.2em;
 }
 
@@ -272,15 +343,22 @@ main {
         padding: 20px;
     }
     
-    .avatars-container {
-        padding: 40px 20px;
-        gap: 30px;
+    .logo-image {
+        width: 90%;
     }
     
-    .avatar-circle {
-        width: 100px;
-        height: 100px;
-        font-size: 3em;
+    .photos-image {
+        width: 100%;
+    }
+    
+    .names-container {
+        gap: 15px;
+    }
+    
+    .name-btn {
+        padding: 15px 30px;
+        font-size: 1.2em;
+        min-width: 100px;
     }
     
     .add-item-form {

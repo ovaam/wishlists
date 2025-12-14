@@ -1,8 +1,8 @@
 // Данные вишлистов
 let wishlists = {
-    'я': [],
+    'леся': [],
     'мама': [],
-    'сестра': []
+    'алина': []
 };
 
 // Текущий выбранный пользователь
@@ -15,9 +15,14 @@ function loadWishlists() {
         try {
             const parsed = JSON.parse(saved);
             // Миграция старых данных (если были строки, преобразуем в объекты)
+            // Также мигрируем старые ключи 'я' -> 'леся' и 'сестра' -> 'алина'
             Object.keys(parsed).forEach(user => {
+                let newKey = user;
+                if (user === 'я') newKey = 'леся';
+                if (user === 'сестра') newKey = 'алина';
+                
                 if (Array.isArray(parsed[user])) {
-                    wishlists[user] = parsed[user].map(item => {
+                    wishlists[newKey] = parsed[user].map(item => {
                         if (typeof item === 'string') {
                             return { name: item, comment: '' };
                         }
@@ -25,6 +30,8 @@ function loadWishlists() {
                     });
                 }
             });
+            // Сохраняем мигрированные данные
+            saveWishlists();
         } catch (e) {
             console.error('Ошибка загрузки данных:', e);
         }
@@ -41,14 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWishlists();
     setupEventListeners();
     showHomeScreen();
+    createSnowflakes();
 });
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Клики по аватарам
-    document.querySelectorAll('.avatar-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const user = card.dataset.user;
+    // Клики по кнопкам имен
+    document.querySelectorAll('.name-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const user = btn.dataset.user;
             openWishlist(user);
         });
     });
@@ -81,9 +89,9 @@ function openWishlist(user) {
     
     // Обновление заголовка
     const titles = {
-        'я': 'Мой вишлист',
+        'леся': 'Вишлист Леси',
         'мама': 'Вишлист мамы',
-        'сестра': 'Вишлист сестры'
+        'алина': 'Вишлист Алины'
     };
     document.getElementById('currentUserTitle').textContent = titles[user];
 
@@ -161,5 +169,57 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Создание анимации снежинок
+function createSnowflakes() {
+    const snowContainer = document.querySelector('.snow-container');
+    if (!snowContainer) return;
+
+    // Создаем 50 снежинок
+    for (let i = 0; i < 50; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.className = 'snowflake';
+        snowflake.innerHTML = '❄';
+        
+        // Случайная позиция и размер
+        const size = Math.random() * 20 + 10;
+        const startX = Math.random() * 100;
+        const duration = Math.random() * 10 + 10;
+        const delay = Math.random() * 5;
+        const drift = (Math.random() - 0.5) * 100;
+        
+        snowflake.style.cssText = `
+            position: absolute;
+            left: ${startX}%;
+            top: -20px;
+            font-size: ${size}px;
+            color: #888;
+            opacity: ${Math.random() * 0.5 + 0.5};
+            animation: snowFall ${duration}s linear infinite;
+            animation-delay: ${delay}s;
+            pointer-events: none;
+            z-index: 1000;
+        `;
+        
+        // Добавляем keyframes для движения
+        if (!document.getElementById('snowAnimation')) {
+            const style = document.createElement('style');
+            style.id = 'snowAnimation';
+            style.textContent = `
+                @keyframes snowFall {
+                    0% {
+                        transform: translateY(0) translateX(0) rotate(0deg);
+                    }
+                    100% {
+                        transform: translateY(100vh) translateX(${drift}px) rotate(360deg);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        snowContainer.appendChild(snowflake);
+    }
 }
 
