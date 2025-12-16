@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест Firebase</title>
+</head>
+<body>
+    <h1>Тест подключения Firebase</h1>
+    <button onclick="testFirebase()">Тест Firebase</button>
+    <div id="result"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB70EQaWcZWaEi9r70hZtq9c11CUHjDZbs",
+            authDomain: "wishlist-8d5ee.firebaseapp.com",
+            databaseURL: "https://wishlist-8d5ee-default-rtdb.firebaseio.com/",
+            projectId: "wishlist-8d5ee",
+            storageBucket: "wishlist-8d5ee.firebasestorage.app",
+            messagingSenderId: "548837942324",
+            appId: "1:548837942324:web:e462f7010f395d9d89d661",
+            measurementId: "G-XYD7ERDPBS"
+        };
+
+        function testFirebase() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<p>Тестирование...</p>';
+            
+            try {
+                // Проверка загрузки SDK
+                if (typeof firebase === 'undefined') {
+                    result.innerHTML = '<p style="color:red">❌ Firebase SDK не загружен!</p>';
+                    return;
+                }
+                result.innerHTML += '<p style="color:green">✅ Firebase SDK загружен</p>';
+                
+                // Инициализация
+                const app = firebase.initializeApp(firebaseConfig);
+                const database = firebase.database();
+                result.innerHTML += '<p style="color:green">✅ Firebase инициализирован</p>';
+                
+                // Проверка подключения
+                database.ref('.info/connected').on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        result.innerHTML += '<p style="color:green">✅ Подключено к Firebase</p>';
+                    } else {
+                        result.innerHTML += '<p style="color:orange">⚠️ Не подключено к Firebase</p>';
+                    }
+                });
+                
+                // Тест записи
+                const testData = {
+                    test: 'Hello Firebase!',
+                    timestamp: new Date().toISOString()
+                };
+                
+                database.ref('test').set(testData)
+                    .then(() => {
+                        result.innerHTML += '<p style="color:green">✅ Тестовые данные записаны</p>';
+                        
+                        // Тест чтения
+                        database.ref('test').once('value', (snapshot) => {
+                            const data = snapshot.val();
+                            result.innerHTML += '<p style="color:green">✅ Тестовые данные прочитаны: ' + JSON.stringify(data) + '</p>';
+                        });
+                    })
+                    .catch((error) => {
+                        result.innerHTML += '<p style="color:red">❌ Ошибка записи: ' + error.message + '</p>';
+                        result.innerHTML += '<p style="color:red">Код ошибки: ' + error.code + '</p>';
+                        if (error.code === 'PERMISSION_DENIED') {
+                            result.innerHTML += '<p style="color:orange">⚠️ Проверьте правила безопасности в Firebase Console!</p>';
+                        }
+                    });
+                    
+            } catch (e) {
+                result.innerHTML += '<p style="color:red">❌ Ошибка: ' + e.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -32,12 +32,24 @@ const firebaseConfig = {
 let database = null;
 try {
     if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         database = firebase.database();
         console.log('Firebase подключен, данные синхронизируются');
+        
+        // Проверяем подключение
+        database.ref('.info/connected').on('value', (snapshot) => {
+            if (snapshot.val() === true) {
+                console.log('Подключено к Firebase Realtime Database');
+            } else {
+                console.log('Не подключено к Firebase Realtime Database');
+            }
+        });
+    } else {
+        console.error('Firebase SDK не загружен! Проверьте подключение скриптов в index.html');
     }
 } catch (e) {
-    console.log('Firebase не подключен, используется localStorage:', e);
+    console.error('Ошибка инициализации Firebase:', e);
+    console.log('Используется localStorage');
 }
 
 // Загрузка данных из Firebase или localStorage
@@ -47,6 +59,15 @@ function loadWishlists() {
         const wishlistsRef = database.ref('wishlists');
         wishlistsRef.on('value', (snapshot) => {
             const data = snapshot.val();
+            console.log('Данные получены из Firebase:', data);
+            
+            // Инициализируем пустые массивы для всех пользователей
+            const defaultWishlists = {
+                'леся': [],
+                'мама': [],
+                'алина': []
+            };
+            
             if (data) {
                 // Миграция данных
                 Object.keys(data).forEach(user => {
@@ -55,7 +76,7 @@ function loadWishlists() {
                     if (user === 'сестра') newKey = 'алина';
                     
                     if (Array.isArray(data[user])) {
-                        wishlists[newKey] = data[user].map(item => {
+                        defaultWishlists[newKey] = data[user].map(item => {
                             if (typeof item === 'string') {
                                 return { name: item, comment: '', owner: newKey, bookedBy: null };
                             }
@@ -63,49 +84,83 @@ function loadWishlists() {
                             if (item.bookedBy === undefined) item.bookedBy = null;
                             return item;
                         });
+                    } else if (data[user]) {
+                        defaultWishlists[newKey] = data[user];
                     }
                 });
-                if (currentUser) {
-                    renderWishlist();
-                }
             }
+            
+            // Обновляем глобальный объект
+            wishlists = defaultWishlists;
+            
+            // Если вишлист открыт, обновляем отображение
+            if (currentUser) {
+                renderWishlist();
+            }
+        }, (error) => {
+            console.error('Ошибка загрузки из Firebase:', error);
+            // Fallback на localStorage
+            loadFromLocalStorage();
         });
     } else {
         // Загрузка из localStorage (fallback)
-        const saved = localStorage.getItem('wishlists');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                Object.keys(parsed).forEach(user => {
-                    let newKey = user;
-                    if (user === 'я') newKey = 'леся';
-                    if (user === 'сестра') newKey = 'алина';
-                    
-                    if (Array.isArray(parsed[user])) {
-                        wishlists[newKey] = parsed[user].map(item => {
-                            if (typeof item === 'string') {
-                                return { name: item, comment: '', owner: newKey, bookedBy: null };
-                            }
-                            if (!item.owner) item.owner = newKey;
-                            if (item.bookedBy === undefined) item.bookedBy = null;
-                            return item;
-                        });
-                    }
-                });
+        loadFromLocalStorage();
+    }
+}
+
+// Загрузка из localStorage
+function loadFromLocalStorage() {
+    const saved = localStorage.getItem('wishlists');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            Object.keys(parsed).forEach(user => {
+                let newKey = user;
+                if (user === 'я') newKey = 'леся';
+                if (user === 'сестра') newKey = 'алина';
+                
+                if (Array.isArray(parsed[user])) {
+                    wishlists[newKey] = parsed[user].map(item => {
+                        if (typeof item === 'string') {
+                            return { name: item, comment: '', owner: newKey, bookedBy: null };
+                        }
+                        if (!item.owner) item.owner = newKey;
+                        if (item.bookedBy === undefined) item.bookedBy = null;
+                        return item;
+                    });
+                }
+            });
+            // Если Firebase доступен, синхронизируем данные
+            if (database) {
                 saveWishlists();
-            } catch (e) {
-                console.error('Ошибка загрузки данных:', e);
             }
+        } catch (e) {
+            console.error('Ошибка загрузки данных:', e);
         }
     }
 }
 
 // Сохранение данных в Firebase или localStorage
 function saveWishlists() {
+    console.log('Сохранение данных:', wishlists);
+    
     if (database) {
         // Сохранение в Firebase
-        database.ref('wishlists').set(wishlists);
+        const wishlistsRef = database.ref('wishlists');
+        wishlistsRef.set(wishlists)
+            .then(() => {
+                console.log('✅ Данные успешно сохранены в Firebase');
+                console.log('Структура данных:', wishlists);
+            })
+            .catch((error) => {
+                console.error('❌ Ошибка сохранения в Firebase:', error);
+                console.error('Код ошибки:', error.code);
+                console.error('Сообщение:', error.message);
+                // Fallback на localStorage
+                localStorage.setItem('wishlists', JSON.stringify(wishlists));
+            });
     } else {
+        console.log('Firebase не доступен, сохранение в localStorage');
         // Сохранение в localStorage (fallback)
         localStorage.setItem('wishlists', JSON.stringify(wishlists));
     }
@@ -132,11 +187,14 @@ function saveAuth() {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    loadWishlists();
-    loadAuth();
-    setupEventListeners();
-    showHomeScreen();
-    createSnowflakes();
+    // Небольшая задержка для инициализации Firebase
+    setTimeout(() => {
+        loadWishlists();
+        loadAuth();
+        setupEventListeners();
+        showHomeScreen();
+        createSnowflakes();
+    }, 100);
 });
 
 // Настройка обработчиков событий
@@ -297,12 +355,18 @@ function addItem() {
     }
 
     // Добавляем элемент в вишлист текущего пользователя
+    if (!wishlists[currentUser]) {
+        wishlists[currentUser] = [];
+    }
+    
     wishlists[currentUser].push({
         name: name,
         comment: comment,
         owner: currentUser,
         bookedBy: null
     });
+    
+    console.log('Добавлено желание для', currentUser, ':', wishlists[currentUser]);
     saveWishlists();
 
     // Очищаем поля ввода
