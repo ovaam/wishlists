@@ -16,42 +16,99 @@ const PASSWORDS = {
     'алина': 'lesikbest'
 };
 
-// Загрузка данных из localStorage
+// Firebase конфигурация
+const firebaseConfig = {
+    apiKey: "AIzaSyB70EQaWcZWaEi9r70hZtq9c11CUHjDZbs",
+    authDomain: "wishlist-8d5ee.firebaseapp.com",
+    databaseURL: "https://wishlist-8d5ee-default-rtdb.firebaseio.com/",
+    projectId: "wishlist-8d5ee",
+    storageBucket: "wishlist-8d5ee.firebasestorage.app",
+    messagingSenderId: "548837942324",
+    appId: "1:548837942324:web:e462f7010f395d9d89d661",
+    measurementId: "G-XYD7ERDPBS"
+};
+
+// Инициализация Firebase
+let database = null;
+try {
+    if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        console.log('Firebase подключен, данные синхронизируются');
+    }
+} catch (e) {
+    console.log('Firebase не подключен, используется localStorage:', e);
+}
+
+// Загрузка данных из Firebase или localStorage
 function loadWishlists() {
-    const saved = localStorage.getItem('wishlists');
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            // Миграция старых данных (если были строки, преобразуем в объекты)
-            // Также мигрируем старые ключи 'я' -> 'леся' и 'сестра' -> 'алина'
-            Object.keys(parsed).forEach(user => {
-                let newKey = user;
-                if (user === 'я') newKey = 'леся';
-                if (user === 'сестра') newKey = 'алина';
-                
-                if (Array.isArray(parsed[user])) {
-                    wishlists[newKey] = parsed[user].map(item => {
-                        if (typeof item === 'string') {
-                            return { name: item, comment: '', owner: newKey, bookedBy: null };
-                        }
-                        // Добавляем недостающие поля к существующим элементам
-                        if (!item.owner) item.owner = newKey;
-                        if (item.bookedBy === undefined) item.bookedBy = null;
-                        return item;
-                    });
+    if (database) {
+        // Загрузка из Firebase
+        const wishlistsRef = database.ref('wishlists');
+        wishlistsRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Миграция данных
+                Object.keys(data).forEach(user => {
+                    let newKey = user;
+                    if (user === 'я') newKey = 'леся';
+                    if (user === 'сестра') newKey = 'алина';
+                    
+                    if (Array.isArray(data[user])) {
+                        wishlists[newKey] = data[user].map(item => {
+                            if (typeof item === 'string') {
+                                return { name: item, comment: '', owner: newKey, bookedBy: null };
+                            }
+                            if (!item.owner) item.owner = newKey;
+                            if (item.bookedBy === undefined) item.bookedBy = null;
+                            return item;
+                        });
+                    }
+                });
+                if (currentUser) {
+                    renderWishlist();
                 }
-            });
-            // Сохраняем мигрированные данные
-            saveWishlists();
-        } catch (e) {
-            console.error('Ошибка загрузки данных:', e);
+            }
+        });
+    } else {
+        // Загрузка из localStorage (fallback)
+        const saved = localStorage.getItem('wishlists');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                Object.keys(parsed).forEach(user => {
+                    let newKey = user;
+                    if (user === 'я') newKey = 'леся';
+                    if (user === 'сестра') newKey = 'алина';
+                    
+                    if (Array.isArray(parsed[user])) {
+                        wishlists[newKey] = parsed[user].map(item => {
+                            if (typeof item === 'string') {
+                                return { name: item, comment: '', owner: newKey, bookedBy: null };
+                            }
+                            if (!item.owner) item.owner = newKey;
+                            if (item.bookedBy === undefined) item.bookedBy = null;
+                            return item;
+                        });
+                    }
+                });
+                saveWishlists();
+            } catch (e) {
+                console.error('Ошибка загрузки данных:', e);
+            }
         }
     }
 }
 
-// Сохранение данных в localStorage
+// Сохранение данных в Firebase или localStorage
 function saveWishlists() {
-    localStorage.setItem('wishlists', JSON.stringify(wishlists));
+    if (database) {
+        // Сохранение в Firebase
+        database.ref('wishlists').set(wishlists);
+    } else {
+        // Сохранение в localStorage (fallback)
+        localStorage.setItem('wishlists', JSON.stringify(wishlists));
+    }
 }
 
 // Загрузка авторизации
