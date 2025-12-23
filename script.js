@@ -20,7 +20,7 @@ const PASSWORDS = {
 const firebaseConfig = {
     apiKey: "AIzaSyB70EQaWcZWaEi9r70hZtq9c11CUHjDZbs",
     authDomain: "wishlist-8d5ee.firebaseapp.com",
-    databaseURL: "https://wishlist-8d5ee-default-rtdb.firebaseio.com/",
+    databaseURL: "https://wishlist-8d5ee-default-rtdb.europe-west1.firebasedatabase.app/",
     projectId: "wishlist-8d5ee",
     storageBucket: "wishlist-8d5ee.firebasestorage.app",
     messagingSenderId: "548837942324",

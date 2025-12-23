@@ -65,3 +65,4 @@ firebase deploy --only hosting
 
 Синхронизация данных через Firebase Realtime Database будет работать на любом хостинге.
 
+

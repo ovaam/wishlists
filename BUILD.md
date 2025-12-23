@@ -50,3 +50,4 @@ git push
 Просто загрузите эти файлы на хостинг (Netlify, GitHub Pages, Vercel и т.д.)
 
 
+

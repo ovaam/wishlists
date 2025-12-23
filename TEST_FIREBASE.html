@@ -1,12 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тест Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: #8B1538;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        button:hover {
+            background: #7B1A3A;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: monospace;
+            line-height: 1.6;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <h1>Тест подключения Firebase</h1>
-    <button onclick="testFirebase()">Тест Firebase</button>
-    <div id="result"></div>
+    <button onclick="testFirebase()" style="padding: 15px 30px; font-size: 16px; background: #8B1538; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 20px 0;">🔍 Тест Firebase</button>
+    <div id="result" style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px; font-family: monospace;"></div>
+    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+        <strong>Инструкция:</strong><br>
+        1. Нажмите кнопку "Тест Firebase" выше<br>
+        2. Откройте консоль браузера (F12 или Cmd+Option+I)<br>
+        3. Посмотрите результаты теста ниже
+    </div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -16,7 +60,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyB70EQaWcZWaEi9r70hZtq9c11CUHjDZbs",
             authDomain: "wishlist-8d5ee.firebaseapp.com",
-            databaseURL: "https://wishlist-8d5ee-default-rtdb.firebaseio.com/",
+            databaseURL: "https://wishlist-8d5ee-default-rtdb.europe-west1.firebasedatabase.app/",
             projectId: "wishlist-8d5ee",
             storageBucket: "wishlist-8d5ee.firebasestorage.app",
             messagingSenderId: "548837942324",
@@ -40,13 +84,40 @@
                 const app = firebase.initializeApp(firebaseConfig);
                 const database = firebase.database();
                 result.innerHTML += '<p style="color:green">✅ Firebase инициализирован</p>';
+                result.innerHTML += '<p style="color:blue">Database URL: ' + firebaseConfig.databaseURL + '</p>';
+                
+                // Проверяем доступность базы данных
+                database.ref('.info/serverTimeOffset').once('value')
+                    .then(() => {
+                        result.innerHTML += '<p style="color:green">✅ База данных доступна</p>';
+                    })
+                    .catch((error) => {
+                        result.innerHTML += '<p style="color:red">❌ База данных недоступна: ' + error.message + '</p>';
+                        result.innerHTML += '<p style="color:red">Код ошибки: ' + error.code + '</p>';
+                    });
                 
                 // Проверка подключения
+                let connectionChecked = false;
                 database.ref('.info/connected').on('value', (snapshot) => {
                     if (snapshot.val() === true) {
                         result.innerHTML += '<p style="color:green">✅ Подключено к Firebase</p>';
+                        connectionChecked = true;
                     } else {
-                        result.innerHTML += '<p style="color:orange">⚠️ Не подключено к Firebase</p>';
+                        if (!connectionChecked) {
+                            result.innerHTML += '<p style="color:orange">⚠️ Ожидание подключения...</p>';
+                            // Попробуем через 3 секунды
+                            setTimeout(() => {
+                                if (!connectionChecked) {
+                                    result.innerHTML += '<p style="color:red">❌ Не удалось подключиться к Firebase</p>';
+                                    result.innerHTML += '<p style="color:orange">Проверьте:</p>';
+                                    result.innerHTML += '<ul style="color:orange">';
+                                    result.innerHTML += '<li>Интернет-соединение</li>';
+                                    result.innerHTML += '<li>Правила безопасности в Firebase Console</li>';
+                                    result.innerHTML += '<li>Блокировку файрволом/антивирусом</li>';
+                                    result.innerHTML += '</ul>';
+                                }
+                            }, 3000);
+                        }
                     }
                 });
                 
@@ -56,23 +127,37 @@
                     timestamp: new Date().toISOString()
                 };
                 
-                database.ref('test').set(testData)
-                    .then(() => {
-                        result.innerHTML += '<p style="color:green">✅ Тестовые данные записаны</p>';
-                        
-                        // Тест чтения
-                        database.ref('test').once('value', (snapshot) => {
-                            const data = snapshot.val();
-                            result.innerHTML += '<p style="color:green">✅ Тестовые данные прочитаны: ' + JSON.stringify(data) + '</p>';
+                // Ждем подключения перед записью
+                setTimeout(() => {
+                    database.ref('test').set(testData)
+                        .then(() => {
+                            result.innerHTML += '<p style="color:green">✅ Тестовые данные записаны в Firebase!</p>';
+                            
+                            // Тест чтения
+                            database.ref('test').once('value', (snapshot) => {
+                                const data = snapshot.val();
+                                result.innerHTML += '<p style="color:green">✅ Тестовые данные прочитаны: ' + JSON.stringify(data) + '</p>';
+                                result.innerHTML += '<p style="color:green; font-weight:bold;">🎉 Firebase работает правильно!</p>';
+                            });
+                        })
+                        .catch((error) => {
+                            result.innerHTML += '<p style="color:red">❌ Ошибка записи: ' + error.message + '</p>';
+                            result.innerHTML += '<p style="color:red">Код ошибки: ' + error.code + '</p>';
+                            if (error.code === 'PERMISSION_DENIED') {
+                                result.innerHTML += '<p style="color:red; font-weight:bold;">⚠️ ОШИБКА: PERMISSION_DENIED</p>';
+                                result.innerHTML += '<p style="color:orange">Нужно настроить правила безопасности в Firebase Console:</p>';
+                                result.innerHTML += '<ol style="color:orange">';
+                                result.innerHTML += '<li>Откройте <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>';
+                                result.innerHTML += '<li>Выберите проект wishlist-8d5ee</li>';
+                                result.innerHTML += '<li>Realtime Database → Rules</li>';
+                                result.innerHTML += '<li>Установите правила:<br><code style="background:#fff;padding:5px;display:block;margin:5px 0;">{"rules": {".read": true, ".write": true}}</code></li>';
+                                result.innerHTML += '<li>Нажмите "Publish"</li>';
+                                result.innerHTML += '</ol>';
+                            } else {
+                                result.innerHTML += '<p style="color:orange">Проверьте интернет-соединение и попробуйте еще раз</p>';
+                            }
                         });
-                    })
-                    .catch((error) => {
-                        result.innerHTML += '<p style="color:red">❌ Ошибка записи: ' + error.message + '</p>';
-                        result.innerHTML += '<p style="color:red">Код ошибки: ' + error.code + '</p>';
-                        if (error.code === 'PERMISSION_DENIED') {
-                            result.innerHTML += '<p style="color:orange">⚠️ Проверьте правила безопасности в Firebase Console!</p>';
-                        }
-                    });
+                }, 2000);
                     
             } catch (e) {
                 result.innerHTML += '<p style="color:red">❌ Ошибка: ' + e.message + '</p>';
